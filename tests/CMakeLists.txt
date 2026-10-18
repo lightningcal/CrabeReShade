@@ -1,0 +1,15 @@
+set(RESHADE_SOURCE "${PROJECT_SOURCE_DIR}/build/reshade-src" CACHE PATH "The pinned ReShade source checkout companion/build.ps1 uses")
+if(NOT EXISTS "${RESHADE_SOURCE}/include/reshade.hpp")
+    message(FATAL_ERROR "Run companion/build.ps1 first, or set RESHADE_SOURCE to the pinned ReShade checkout.")
+endif()
+
+add_library(manual_addon_probe SHARED probe.cpp)
+set_target_properties(manual_addon_probe PROPERTIES SUFFIX ".addon32" CXX_STANDARD 17)
+target_include_directories(manual_addon_probe PRIVATE "${RESHADE_SOURCE}/include")
+target_compile_definitions(manual_addon_probe PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
+
+add_executable(manual_addon_smoke smoke.cpp)
+set_target_properties(manual_addon_smoke PROPERTIES CXX_STANDARD 17)
+target_include_directories(manual_addon_smoke PRIVATE "${RESHADE_SOURCE}/include")
+target_compile_definitions(manual_addon_smoke PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_link_libraries(manual_addon_smoke PRIVATE d3d11 dxgi user32 d3dcompiler)
