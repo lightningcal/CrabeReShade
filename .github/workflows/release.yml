@@ -1,0 +1,82 @@
+# Builds CrabeReShade.asi and the companion ReShade32.dll, runs the companion smoke test, and packages both.
+# Pushing a tag such as v0.1.0 publishes a GitHub release with the package attached; a tag with a hyphen
+# (v0.1.0-beta.1) is published as a pre-release. Running the workflow by hand only builds and uploads the package.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the companion ReShade32.dll
+        shell: pwsh
+        run: ./companion/build.ps1
+
+      - name: Build the plugin and the smoke test
+        shell: pwsh
+        run: |
+          cmake -S . -B build -A Win32 -DCRABE_RESHADE_BUILD_TESTS=ON
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cmake --build build --config Release --parallel
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+      - name: Smoke test the companion DLL (WARP)
+        shell: pwsh
+        run: |
+          ./build/tests/Release/manual_addon_smoke.exe build/companion/ReShade32.dll build/tests/Release/manual_addon_probe.addon32
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+      - name: Package
+        id: package
+        shell: pwsh
+        run: |
+          $version = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME } else { "dev-$($env:GITHUB_SHA.Substring(0, 7))" }
+          $name = "CrabeReShade-$version"
+          $stage = "dist/$name"
+          New-Item -ItemType Directory -Force "$stage/plugins" | Out-Null
+          Copy-Item build/Release/CrabeReShade.asi, build/companion/ReShade32.dll "$stage/plugins/"
+          Copy-Item README.md, companion/RESHADE-LICENSE.md "$stage/"
+          Compress-Archive -Path "$stage/*" -DestinationPath "dist/$name.zip"
+          Copy-Item build/Release/CrabeReShade.asi, build/companion/ReShade32.dll dist/
+          Get-ChildItem dist -File | ForEach-Object { "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), $_.Name } |
+            Set-Content dist/SHA256SUMS.txt
+          "name=$name" >> $env:GITHUB_OUTPUT
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.name }}
+          path: |
+            dist/*.zip
+            dist/*.asi
+            dist/*.dll
+            dist/SHA256SUMS.txt
+
+      - name: Publish the release
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          $notes = @"
+          Drop the zip's ``plugins`` folder next to ``DisneyInfinity3.exe``. See the README for the full steps.
+
+          * ``CrabeReShade.asi``: the plugin. It needs a CrabeLoader with plugin API v2 (``onPresent`` / ``onBeforeResize``).
+          * ``ReShade32.dll``: the companion ReShade 6.8.0 build with add-ons and game depth. To use only effects,
+            the official installer's ``dxgi.dll``, renamed ``ReShade32.dll``, works instead.
+
+          ReShade is Copyright 2014 Patrick Mours, BSD 3-Clause; its license is in the zip.
+          "@
+          $flags = @()
+          if ($tag.Contains('-')) { $flags += '--prerelease' }
+          gh release create $tag dist/*.zip dist/*.asi dist/*.dll dist/SHA256SUMS.txt --title "CrabeReShade $tag" --notes $notes @flags
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }

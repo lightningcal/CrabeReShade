@@ -26,7 +26,8 @@ this plugin replaces, and the plugin then refuses to start.
 2. Move `dxgi.dll` from the game folder into `plugins/`.
 3. Rename it to `ReShade32.dll`. In Explorer, turn on *View > File name extensions* first, so you don't end up
    with `ReShade32.dll.dll`.
-4. Copy `CrabeReShade.asi` into `plugins/`.
+4. Download `CrabeReShade.asi` from the [latest release](https://github.com/lightningcal/CrabeReShade/releases/latest)
+   and copy it into `plugins/`.
 
 Leave `ReShade.ini` and `reshade-shaders/` where the installer put them. The same steps in PowerShell, run from
 the game folder:
@@ -84,10 +85,16 @@ For those, use the companion build instead of the installer's DLL in `plugins/Re
 installer for `ReShade.ini` and the shaders, and still delete its `dxgi.dll`. The companion is ReShade v6.8.0
 with [`companion/manual-addons.patch`](companion/manual-addons.patch) and
 [`companion/crabe_manual_depth.hpp`](companion/crabe_manual_depth.hpp), which forward the game's draws, binds
-and depth clears to add-ons such as Generic Depth. Build it as shown below. No ReShade binary is committed here.
+and depth clears to add-ons such as Generic Depth. Each [release](https://github.com/lightningcal/CrabeReShade/releases/latest)
+has it prebuilt: the zip's `plugins` folder holds both `CrabeReShade.asi` and the companion `ReShade32.dll`. You can
+also build it as shown below. No ReShade binary is committed to this repository.
 `loader.log` then says `ReShade loaded (companion build): add-ons and game depth are available.`
 
 ## Build
+
+Pushing a `v*` tag runs [`.github/workflows/release.yml`](.github/workflows/release.yml): it builds both files, runs
+the smoke test and publishes a release with the zip attached. A tag with a hyphen, such as `v0.1.0-beta.1`, becomes a
+pre-release. To build locally:
 
 Visual Studio 2022 (or Build Tools) with the C++ workload, CMake and git:
 
