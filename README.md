@@ -5,7 +5,8 @@ game's own D3D11 swap chain. ReShade's usual `dxgi.dll` proxy wraps every D3D11 
 setups (RTSS, for example). This plugin uses ReShade's manual-runtime API instead, so the game and other
 overlays keep the native COM objects. Effects render just before CrabeLoader's overlay.
 
-Requires CrabeLoader with plugin API v2 (`onPresent` / `onBeforeResize`).
+Requires CrabeLoader with plugin API v2 (`onPresent` / `onBeforeResize`), merged into CrabeLoader's `dev` branch in
+[#61](https://github.com/LucasLhomme/CrabeLoader/pull/61) and shipped from the first CrabeLoader release after it.
 
 ## Install
 
