@@ -111,3 +111,12 @@ build/tests/Release/manual_addon_smoke.exe build/companion/ReShade32.dll build/t
 * Add-ons see the subset of D3D11 events depth capture needs (draws, render-target and viewport binds, depth
   clears, command lists), not ReShade's full proxy event set.
 * Compiling shaders when the runtime is first created can pause the game for a moment.
+
+## Third-party code
+
+* [`companion/manual-addons.patch`](companion/manual-addons.patch) modifies [ReShade](https://github.com/crosire/reshade),
+  Copyright 2014 Patrick Mours, under the BSD 3-Clause license in [`companion/RESHADE-LICENSE.md`](companion/RESHADE-LICENSE.md).
+  `companion/build.ps1` downloads the ReShade source itself; no ReShade code or binary is otherwise included.
+* [`sdk/crabe_plugin.h`](sdk/crabe_plugin.h) is CrabeLoader's plugin API header, copied unchanged as its
+  [`.asi` guide](https://github.com/LucasLhomme/CrabeLoader/blob/dev/docs/guides/asi_plugins.md) asks. CrabeLoader is
+  licensed under the GNU GPL v3.
