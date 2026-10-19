@@ -70,7 +70,9 @@ jobs:
           $notes = @"
           Drop the zip's ``plugins`` folder next to ``DisneyInfinity3.exe``. See the README for the full steps.
 
-          * ``CrabeReShade.asi``: the plugin. It needs a CrabeLoader with plugin API v2 (``onPresent`` / ``onBeforeResize``).
+          * ``CrabeReShade.asi``: the plugin. It needs CrabeLoader's plugin API v2 (``onPresent`` / ``onBeforeResize``),
+            added after CrabeLoader 1.1.0 in [#61](https://github.com/LucasLhomme/CrabeLoader/pull/61). On 1.1.0, ``loader.log``
+            says ``needs CrabeLoader's plugin API v2`` and ReShade stays off.
           * ``ReShade32.dll``: the companion ReShade 6.8.0 build with add-ons and game depth. To use only effects,
             the official installer's ``dxgi.dll``, renamed ``ReShade32.dll``, works instead.
 
