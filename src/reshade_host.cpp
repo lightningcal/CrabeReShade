@@ -99,7 +99,8 @@ namespace crabe_reshade {
 
         EnvironmentOverride noGraphicsHooks(L"RESHADE_DISABLE_GRAPHICS_HOOK", L"1");
         EnvironmentOverride base(L"RESHADE_BASE_PATH_OVERRIDE", basePath.c_str());
-        if (!noGraphicsHooks.applied() || !base.applied()) {
+        EnvironmentOverride noLoadingCheck(L"RESHADE_DISABLE_LOADING_CHECK", L"1");
+        if (!noGraphicsHooks.applied() || !base.applied() || !noLoadingCheck.applied()) {
             fail("could not set ReShade's loading environment.");
             return false;
         }
